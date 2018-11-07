@@ -1,24 +1,22 @@
 import {
-  ILayoutRestorer,
-  JupyterLab, JupyterLabPlugin
+  ILayoutRestorer, JupyterLab, JupyterLabPlugin
 } from '@jupyterlab/application';
 
 import {
     IConsoleTracker
 } from '@jupyterlab/console';
 
-//
-// import {
-//   JSONExt
-// } from '@phosphor/coreutils';
+import {
+    InstanceTracker
+} from '@jupyterlab/apputils';
+
+import {
+  JSONExt
+} from '@phosphor/coreutils';
 
 import {
   Message
 } from '@phosphor/messaging';
-
-// import {
-//   InstanceTracker
-// } from '@jupyterlab/apputils';
 
 import {
   INotebookTracker, NotebookPanel
@@ -34,6 +32,12 @@ import {
 
 
 import '../style/index.css';
+
+
+namespace CommandIDs {
+    export
+    const open = "jupyterlab_dash:open";
+}
 
 /**
  * An xckd comic viewer.
@@ -133,13 +137,39 @@ function activate(app: JupyterLab,
       })
     })
   });
-  // // Track and restore the widget state
-  // let tracker = new InstanceTracker<Widget>({ namespace: 'xkcd' });
-  // restorer.restore(tracker, {
-  //   command,
-  //   args: () => JSONExt.emptyObject,
-  //   name: () => 'plotly-dash'
-  // });
+
+  // Track and restore the widget state
+  let tracker = new InstanceTracker<Widget>({ namespace: 'jupyterlab_dash' });
+  const command = CommandIDs.open;
+  restorer.restore(tracker, {
+    command,
+    args: () => JSONExt.emptyObject,
+    name: () => 'jupyterlab_dash'
+  });
+
+  // Add command to palette
+  app.commands.addCommand( command, {
+      label: "Restore Dash Viewers",
+      execute: () => {
+
+        widgets.forEach(widget => {
+          if (!widget.isAttached) {
+              // Attach the widget to the main work area
+              // if it's not there
+              console.log('Widget was not attached, adding to main area');
+              app.shell.addToMainArea(widget);
+              widget.update();
+            } else {
+              // Refresh the widget
+              console.log('Widget already, updating');
+              widget.update();
+            }
+
+            // Activate the widget
+            app.shell.activateById(widget.id);
+        });
+      }
+  } );
 }
 
 
