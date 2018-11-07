@@ -2,6 +2,7 @@
 
 A JupyterLab extensions for rendering Plotly Dash apps
 
+**Note:**: This extension does not currently support Windows or Python 2
 
 ## Prerequisites
 
