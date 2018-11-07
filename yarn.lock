@@ -101,6 +101,24 @@
     "@phosphor/signaling" "^1.2.2"
     codemirror "~5.39.0"
 
+"@jupyterlab/console@^0.19.1":
+  version "0.19.1"
+  resolved "https://registry.yarnpkg.com/@jupyterlab/console/-/console-0.19.1.tgz#3fe7439f7e202d91c00090beb821662eaf0bd336"
+  dependencies:
+    "@jupyterlab/apputils" "^0.19.1"
+    "@jupyterlab/cells" "^0.19.1"
+    "@jupyterlab/codeeditor" "^0.19.1"
+    "@jupyterlab/coreutils" "^2.2.1"
+    "@jupyterlab/observables" "^2.1.1"
+    "@jupyterlab/rendermime" "^0.19.1"
+    "@jupyterlab/services" "^3.2.1"
+    "@phosphor/algorithm" "^1.1.2"
+    "@phosphor/coreutils" "^1.3.0"
+    "@phosphor/disposable" "^1.1.2"
+    "@phosphor/messaging" "^1.2.2"
+    "@phosphor/signaling" "^1.2.2"
+    "@phosphor/widgets" "^1.6.0"
+
 "@jupyterlab/coreutils@^2.2.1":
   version "2.2.1"
   resolved "https://registry.yarnpkg.com/@jupyterlab/coreutils/-/coreutils-2.2.1.tgz#c271eaf2f6e468757ba9660f24bd3c3e5d6fe583"
