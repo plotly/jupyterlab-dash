@@ -74,17 +74,9 @@ class DashIFrameWidget extends Widget {
    * Handle update requests for the widget.
    */
   onUpdateRequest(msg: Message): void {
-    console.log('onUpdateRequest');
-    // (document.getElementById(this.iframe.id) as HTMLIFrameElement).contentWindow.location.reload();
-    let delay = new Promise(resolve => setTimeout(resolve, 100));
-    delay.then(() => {
-      this.iframe.src += '';
-    });
-
-    // .contentWindow.location.reload();
-    // this.iframe.contentWindow.location.reload();
+    this.iframe.src += '';
   }
-};
+}
 
 interface DashMessageData {
   type:    string;
@@ -145,6 +137,7 @@ function activate(app: JupyterLab,
                     // if it's not there
                     console.log('Widget was not attached, adding to main area');
                     app.shell.addToMainArea(widget);
+                    widget.update();
                   } else {
                     // Refresh the widget
                     console.log('Widget already, updating');
