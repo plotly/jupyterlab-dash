@@ -26,18 +26,18 @@ class AppViewer(object):
         self.port = port
         self.stderr_queue = StdErrorQueue()
 
-    def show(self, app):
-        def run():
+    def show(self, app, *args, **kwargs):
+        def run(*args, **kwargs):
             # Serve App
             sys.stdout = self.stderr_queue
             sys.stderr = self.stderr_queue
-            app.run_server(debug=False, port=self.port)
+            app.run_server(debug=False, port=self.port, *args, **kwargs)
 
         # Terminate any existing server process
         self.terminate()
 
         # Start new server process in separate process
-        self.server_process = multiprocessing.Process(target=run)
+        self.server_process = multiprocessing.Process(target=run, args=args, kwargs=kwargs)
         self.server_process.daemon = True
         self.server_process.start()
 
