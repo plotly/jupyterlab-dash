@@ -34,6 +34,9 @@ jupyter lab build
 
 ```python
 import jupyterlab_dash
+import dash
+import dash_html_components as html
+
 viewer = jupyterlab_dash.AppViewer(port=8050)
 
 app = dash.Dash(__name__)
