@@ -1,4 +1,5 @@
 import multiprocessing
+import socket
 import uuid
 from queue import Empty
 
@@ -20,9 +21,10 @@ class StdErrorQueue(object):
 class AppViewer(object):
     _dash_comm = Comm(target_name='dash_viewer')
 
-    def __init__(self, port=8050):
+    def __init__(self, host='127.0.0.1', port=8050):
         self.server_process = None
         self.uid = str(uuid.uuid4())
+        self.host = host
         self.port = port
         self.stderr_queue = StdErrorQueue()
 
@@ -31,7 +33,7 @@ class AppViewer(object):
             # Serve App
             sys.stdout = self.stderr_queue
             sys.stderr = self.stderr_queue
-            app.run_server(debug=False, port=self.port)
+            app.run_server(debug=False, host=self.host, port=self.port)
 
         # Terminate any existing server process
         self.terminate()
@@ -60,10 +62,11 @@ class AppViewer(object):
 
         if started:
             # Update front-end extension
+            hostname = socket.getfqdn() if self.host != '127.0.0.1' and self.host != 'localhost' else self.host
             self._dash_comm.send({
                 'type': 'show',
                 'uid': self.uid,
-                'url': 'http://localhost:{}'.format(self.port)
+                'url': 'http://{}:{}'.format(hostname, self.port)
             })
         else:
             # Failed to start development server
