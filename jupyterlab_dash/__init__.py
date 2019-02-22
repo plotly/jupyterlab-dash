@@ -21,11 +21,12 @@ class StdErrorQueue(object):
 class AppViewer(object):
     _dash_comm = Comm(target_name='dash_viewer')
 
-    def __init__(self, host='127.0.0.1', port=8050):
+    def __init__(self, host='127.0.0.1', port=8050, url=None):
         self.server_process = None
         self.uid = str(uuid.uuid4())
         self.host = host
         self.port = port
+        self.url = url
         self.stderr_queue = StdErrorQueue()
 
     def show(self, app):
@@ -62,12 +63,20 @@ class AppViewer(object):
 
         if started:
             # Update front-end extension
-            hostname = socket.getfqdn() if self.host != '127.0.0.1' and self.host != 'localhost' else self.host
-            self._dash_comm.send({
-                'type': 'show',
-                'uid': self.uid,
-                'url': 'http://{}:{}'.format(hostname, self.port)
-            })
+            if self.url is None:
+                hostname = socket.getfqdn() if self.host != '127.0.0.1' and self.host != 'localhost' else self.host
+                self._dash_comm.send({
+                    'type': 'show',
+                    'uid': self.uid,
+                    'url': 'http://{}:{}'.format(hostname, self.port)
+                })
+            else:
+                self._dash_comm.send({
+                    'type': 'show',
+                    'uid': self.uid,
+                    'url': self.url
+                })
+
         else:
             # Failed to start development server
             raise ConnectionError('Unable to start Dash server')
