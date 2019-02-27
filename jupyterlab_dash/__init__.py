@@ -1,4 +1,5 @@
 import multiprocessing
+import socket
 import uuid
 from queue import Empty
 
@@ -20,9 +21,10 @@ class StdErrorQueue(object):
 class AppViewer(object):
     _dash_comm = Comm(target_name='dash_viewer')
 
-    def __init__(self, port=8050):
+    def __init__(self, host='localhost', port=8050):
         self.server_process = None
         self.uid = str(uuid.uuid4())
+        self.host = host
         self.port = port
         self.stderr_queue = StdErrorQueue()
 
@@ -31,13 +33,17 @@ class AppViewer(object):
             # Serve App
             sys.stdout = self.stderr_queue
             sys.stderr = self.stderr_queue
-            app.run_server(debug=False, port=self.port, *args, **kwargs)
+            app.run_server(debug=False, *args, **kwargs)
 
         # Terminate any existing server process
         self.terminate()
 
+        # precedence host and port
+        launch_kwargs = {'host': self.host, 'port': self.port}
+        launch_kwargs.update(kwargs)
+
         # Start new server process in separate process
-        self.server_process = multiprocessing.Process(target=run, args=args, kwargs=kwargs)
+        self.server_process = multiprocessing.Process(target=run, args=args, kwargs=launch_kwargs)
         self.server_process.daemon = True
         self.server_process.start()
 
@@ -60,10 +66,12 @@ class AppViewer(object):
 
         if started:
             # Update front-end extension
+            hostname = launch_kwargs['host']
+            resolved_host = socket.getfqdn() if hostname != '127.0.0.1' and hostname != 'localhost' else hostname
             self._dash_comm.send({
                 'type': 'show',
                 'uid': self.uid,
-                'url': 'http://localhost:{}'.format(self.port)
+                'url': 'http://{}:{}'.format(resolved_host, launch_kwargs['port'])
             })
         else:
             # Failed to start development server
