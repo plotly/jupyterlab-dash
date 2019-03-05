@@ -18,16 +18,29 @@ We haven't published the component yet, but we will soon. In the meantime, you'l
 ```bash
 git clone https://github.com/plotly/jupyterlab-dash
 cd jupyterlab-dash
-npm install
-npm run build
+# Install Python package
+pip install -e .
+# Install Javascript dependencies
+npm install # or yarn
+# Build JupyterLab extension
+npm run build # or yarn build
 jupyter labextension link .
 ```
 
-To rebuild the package and the JupyterLab app:
+To rebuild the JupyterLab extension:
 
 ```bash
 npm run build
 jupyter lab build
+```
+
+To rebuild the JupyterLab extension automatically as the source changes:
+
+```bash
+# In one terminal tab, watch the jupyterlab-dash directory
+npm run watch # or yarn watch
+# In another terminal tab, run jupyterlab with the watch flag
+jupyter lab --watch
 ```
 
 ## Usage
