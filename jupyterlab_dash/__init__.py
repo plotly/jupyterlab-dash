@@ -71,7 +71,8 @@ class AppViewer(object):
             self._dash_comm.send({
                 'type': 'show',
                 'uid': self.uid,
-                'url': 'http://{}:{}'.format(resolved_host, launch_kwargs['port'])
+                'url': 'http://{}:{}'.format(resolved_host, launch_kwargs['port']),
+                'port': launch_kwargs['port']
             })
         else:
             # Failed to start development server

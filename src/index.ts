@@ -6,6 +6,8 @@ import {
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
+import { PageConfig } from '@jupyterlab/coreutils';
+
 //
 // import {
 //   JSONExt
@@ -32,7 +34,7 @@ class DashIFrameWidget extends Widget {
   /**
    * Construct a new DashIFrameWidget.
    */
-  constructor(uid: string, url: string) {
+  constructor(uid: string, url: string, port: string) {
     super();
 
     this.id = uid;
@@ -46,10 +48,12 @@ class DashIFrameWidget extends Widget {
     // See https://github.com/jupyterlab/jupyterlab/blob/master/packages/apputils/style/iframe.css#L17-L35
     this.addClass('jp-IFrame');
 
-    let iframeElement = document.createElement('iframe');
-    iframeElement.setAttribute('baseURI', '');
+    const baseUrl = PageConfig.getBaseUrl();
+    const serviceUrl = `${baseUrl}proxy/${port}`;
+    const iframeElement = document.createElement('iframe');
+    iframeElement.setAttribute('baseURI', serviceUrl);
     this.iframe = iframeElement;
-    this.iframe.src = url;
+    this.iframe.src = serviceUrl;
     this.iframe.id = 'iframe-' + this.id;
 
     this.node.appendChild(this.iframe);
@@ -77,6 +81,7 @@ interface DashMessageData {
   type: string;
   uid: string;
   url: string;
+  port: string;
 }
 
 /**
@@ -152,7 +157,11 @@ function registerCommTarget(
           if (!widgets.has(msgData.uid)) {
             // Create a new widget
             console.log('Create new widget');
-            widget = new DashIFrameWidget(msgData.uid, msgData.url);
+            widget = new DashIFrameWidget(
+              msgData.uid,
+              msgData.url,
+              msgData.port
+            );
             widget.update();
             widgets.set(msgData.uid, widget);
 
