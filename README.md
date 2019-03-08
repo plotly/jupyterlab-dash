@@ -8,8 +8,7 @@ A JupyterLab extension for rendering Plotly Dash apps as a separate window in Ju
 
 ## Prerequisites
 
-* JupyterLab
-
+- JupyterLab
 
 ## Installation
 

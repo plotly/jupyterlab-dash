@@ -1,37 +1,27 @@
 import {
   ILayoutRestorer,
-  JupyterLab, JupyterLabPlugin
+  JupyterLab,
+  JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import {
-    IConsoleTracker
-} from '@jupyterlab/console';
+import { IConsoleTracker } from '@jupyterlab/console';
 
 //
 // import {
 //   JSONExt
 // } from '@phosphor/coreutils';
 
-import {
-  Message
-} from '@phosphor/messaging';
+import { Message } from '@phosphor/messaging';
 
 // import {
 //   InstanceTracker
 // } from '@jupyterlab/apputils';
 
-import {
-  INotebookTracker, NotebookPanel
-} from '@jupyterlab/notebook';
+import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import {
-  Widget
-} from '@phosphor/widgets';
+import { Widget } from '@phosphor/widgets';
 
-import {
-    KernelMessage, Kernel
-} from "@jupyterlab/services";
-
+import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 import '../style/index.css';
 
@@ -84,54 +74,55 @@ class DashIFrameWidget extends Widget {
 }
 
 interface DashMessageData {
-  type:    string;
-  uid:     string;
-  url:     string;
+  type: string;
+  uid: string;
+  url: string;
 }
 
 /**
  * Activate the xckd widget extension.
  */
-function activate(app: JupyterLab,
-                  restorer: ILayoutRestorer,
-                  notebooks: INotebookTracker,
-                  consoles: IConsoleTracker) {
-
+function activate(
+  app: JupyterLab,
+  restorer: ILayoutRestorer,
+  notebooks: INotebookTracker,
+  consoles: IConsoleTracker
+) {
   console.log('JupyterLab extension jupyterlab_dash is activated!');
 
   // Declare a widget variable
   let widgets = new Map<string, DashIFrameWidget>();
 
   // Watch notebook creation
-  notebooks.widgetAdded.connect(( sender, nbPanel: NotebookPanel ) => {
+  notebooks.widgetAdded.connect((sender, nbPanel: NotebookPanel) => {
     console.log('Notebook added!');
     const session = nbPanel.session;
-    session.ready.then(() =>  {
-      console.log("Notebook session ready");
+    session.ready.then(() => {
+      console.log('Notebook session ready');
       let kernel = session.kernel;
       kernel.ready.then(() => {
-        console.log("Notebook kernel ready");
+        console.log('Notebook kernel ready');
 
         // Register comm
         registerCommTarget(kernel, widgets, app);
-      })
-    })
+      });
+    });
   });
 
   // Watch console creation
-  consoles.widgetAdded.connect(( sender, consolePanel ) => {
+  consoles.widgetAdded.connect((sender, consolePanel) => {
     console.log('Console added!');
     const session = consolePanel.session;
     session.ready.then(() => {
-      console.log("Console session ready");
+      console.log('Console session ready');
       let kernel = session.kernel;
       kernel.ready.then(() => {
-        console.log("Console kernel ready");
+        console.log('Console kernel ready');
 
         // Register comm
         registerCommTarget(kernel, widgets, app);
-      })
-    })
+      });
+    });
   });
   // // Track and restore the widget state
   // let tracker = new InstanceTracker<Widget>({ namespace: 'xkcd' });
@@ -142,57 +133,55 @@ function activate(app: JupyterLab,
   // });
 }
 
+function registerCommTarget(
+  kernel: Kernel.IKernelConnection,
+  widgets: Map<string, DashIFrameWidget>,
+  app: JupyterLab
+) {
+  kernel.registerCommTarget(
+    'dash_viewer',
+    (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
+      console.log('dash_viewer comm opened!');
+      comm.onMsg = (msg: KernelMessage.ICommMsgMsg) => {
+        console.log('dash_viewer comm message received');
+        console.log(msg);
+        let msgData = (msg.content.data as unknown) as DashMessageData;
+        console.log(msgData.type);
+        if (msgData.type === 'show') {
+          let widget: DashIFrameWidget;
+          if (!widgets.has(msgData.uid)) {
+            // Create a new widget
+            console.log('Create new widget');
+            widget = new DashIFrameWidget(msgData.uid, msgData.url);
+            widget.update();
+            widgets.set(msgData.uid, widget);
 
-function registerCommTarget(kernel: Kernel.IKernelConnection,
-                            widgets: Map<string, DashIFrameWidget>,
-                            app: JupyterLab) {
-  kernel.registerCommTarget('dash_viewer',
-      (comm: Kernel.IComm, msg: KernelMessage.ICommOpenMsg) => {
-        console.log('dash_viewer comm opened!');
-        comm.onMsg = (msg: KernelMessage.ICommMsgMsg) => {
-          console.log("dash_viewer comm message received");
-          console.log(msg);
-          let msgData = msg.content.data as unknown as DashMessageData;
-          console.log(msgData.type);
-          if (msgData.type === 'show') {
-
-            let widget: DashIFrameWidget;
-            if (!widgets.has(msgData.uid)) {
-              // Create a new widget
-              console.log('Create new widget');
-              widget = new DashIFrameWidget(msgData.uid, msgData.url);
-              widget.update();
-              widgets.set(msgData.uid, widget);
-
-              // Add instance tracker stuff
-            } else {
-              console.log('Found existing widget');
-              widget = widgets.get(msgData.uid);
-            }
-
-            if (!widget.isAttached) {
-              // Attach the widget to the main work area
-              // if it's not there
-              console.log('Widget was not attached, adding to main area');
-              app.shell.addToMainArea(widget);
-              widget.update();
-            } else {
-              // Refresh the widget
-              console.log('Widget already, updating');
-              widget.update();
-            }
-
-            // Activate the widget
-            app.shell.activateById(widget.id);
+            // Add instance tracker stuff
+          } else {
+            console.log('Found existing widget');
+            widget = widgets.get(msgData.uid);
           }
-        };
 
-        comm.onClose = (msg: KernelMessage.ICommCloseMsg) => {
-          console.log('dash_viewer comm message closed');
-          console.log(msg);
-        };
-      });
+          if (!widget.isAttached) {
+            // Attach the widget to the main work area
+            // if it's not there
+            console.log('Widget was not attached, adding to main area');
+            app.shell.addToMainArea(widget);
+            widget.update();
+          } else {
+            // Refresh the widget
+            console.log('Widget already, updating');
+            widget.update();
+          }
+
+          // Activate the widget
+          app.shell.activateById(widget.id);
+        }
+      };
+    }
+  );
 }
+
 /**
  * Initialization data for the jupyterlab_dash extension.
  */
