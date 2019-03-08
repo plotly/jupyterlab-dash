@@ -4,26 +4,17 @@ import {
   JupyterLabPlugin
 } from '@jupyterlab/application';
 
-import { IConsoleTracker } from '@jupyterlab/console';
-
 import { PageConfig } from '@jupyterlab/coreutils';
-
-//
-// import {
-//   JSONExt
-// } from '@phosphor/coreutils';
-
-import { Message } from '@phosphor/messaging';
-
-// import {
-//   InstanceTracker
-// } from '@jupyterlab/apputils';
 
 import { INotebookTracker, NotebookPanel } from '@jupyterlab/notebook';
 
-import { Widget } from '@phosphor/widgets';
-
 import { KernelMessage, Kernel } from '@jupyterlab/services';
+
+import { IConsoleTracker } from '@jupyterlab/console';
+
+import { Message } from '@phosphor/messaging';
+
+import { Widget } from '@phosphor/widgets';
 
 import '../style/index.css';
 
@@ -38,7 +29,6 @@ class DashIFrameWidget extends Widget {
     super();
 
     this.id = uid;
-    this.url = url;
     this.title.label = 'Dash';
     this.title.closable = true;
     this.addClass('jp-dashWidget');
@@ -63,11 +53,6 @@ class DashIFrameWidget extends Widget {
    * The image element associated with the widget.
    */
   readonly iframe: HTMLIFrameElement;
-
-  /**
-   * URL
-   */
-  readonly url: string;
 
   /**
    * Handle update requests for the widget.
@@ -129,13 +114,6 @@ function activate(
       });
     });
   });
-  // // Track and restore the widget state
-  // let tracker = new InstanceTracker<Widget>({ namespace: 'xkcd' });
-  // restorer.restore(tracker, {
-  //   command,
-  //   args: () => JSONExt.emptyObject,
-  //   name: () => 'plotly-dash'
-  // });
 }
 
 function registerCommTarget(
