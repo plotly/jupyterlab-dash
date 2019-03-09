@@ -2,10 +2,11 @@ import multiprocessing
 import socket
 import uuid
 from queue import Empty
-
-from ipykernel.comm import Comm
+from urllib.parse import urlparse
 import sys
 
+from ipykernel.comm import Comm
+from notebook import notebookapp
 
 class StdErrorQueue(object):
     def __init__(self):
@@ -33,6 +34,13 @@ class AppViewer(object):
             # Serve App
             sys.stdout = self.stderr_queue
             sys.stderr = self.stderr_queue
+
+            # Set pathname prefix for jupyter-server-proxy
+            url = next(notebookapp.list_running_servers())['url']
+
+            path = urlparse(url).path
+            app.config.update({'requests_pathname_prefix': f'{path}proxy/{self.port}/'})
+            
             app.run_server(debug=False, *args, **kwargs)
 
         # Terminate any existing server process
