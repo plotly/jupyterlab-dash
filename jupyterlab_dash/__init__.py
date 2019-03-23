@@ -1,12 +1,13 @@
 import multiprocessing
 import socket
 import uuid
+import retrying
 from queue import Empty
 from urllib.parse import urlparse
 import sys
 
 from ipykernel.comm import Comm
-from notebook import notebookapp
+
 
 class StdErrorQueue(object):
     def __init__(self):
@@ -21,6 +22,7 @@ class StdErrorQueue(object):
 
 class AppViewer(object):
     _dash_comm = Comm(target_name='dash_viewer')
+    _jupyterlab_url = None
 
     def __init__(self, host='localhost', port=8050):
         self.server_process = None
@@ -29,16 +31,38 @@ class AppViewer(object):
         self.port = port
         self.stderr_queue = StdErrorQueue()
 
+    @staticmethod
+    @retrying.retry(stop_max_delay=5000)
+    def _get_or_wait_for_jupyterlab_url():
+        if AppViewer._jupyterlab_url is None:
+            raise ValueError('_jupyterlab_url is None')
+        return AppViewer._jupyterlab_url
+
+    @staticmethod
+    def get_jupyterlab_url():
+        try:
+            return AppViewer._get_or_wait_for_jupyterlab_url()
+        except ValueError as e:
+            raise IOError("""
+Unable to communicate with the jupyterlab-dash JupyterLab extension.
+Is this Python kernel running inside JupyterLab with the jupyterlab-dash
+extension installed?
+
+You can install the extension with:
+
+$ jupyter labextension install jupyterlab-dash
+""")
+
     def show(self, app, *args, **kwargs):
+        jupyterlab_url = AppViewer.get_jupyterlab_url()
+
         def run(*args, **kwargs):
             # Serve App
             sys.stdout = self.stderr_queue
             sys.stderr = self.stderr_queue
 
             # Set pathname prefix for jupyter-server-proxy
-            url = next(notebookapp.list_running_servers())['url']
-
-            path = urlparse(url).path
+            path = urlparse(jupyterlab_url).path
             app.config.update({'requests_pathname_prefix': f'{path}proxy/{self.port}/'})
             
             app.run_server(debug=False, *args, **kwargs)
@@ -89,3 +113,19 @@ class AppViewer(object):
     def terminate(self):
         if self.server_process:
             self.server_process.terminate()
+
+
+# Register handler to process events sent from the
+# front-end JupyterLab extension to the python kernel
+@AppViewer._dash_comm.on_msg
+def _recv(msg):
+    msg_data = msg.get('content').get('data')
+    msg_type = msg_data.get('type', None)
+    if msg_type == 'url_response':
+        AppViewer._jupyterlab_url = msg_data['url']
+
+
+# Request that the front end extension send us the notebook server base URL
+AppViewer._dash_comm.send({
+    'type': 'url_request'
+})

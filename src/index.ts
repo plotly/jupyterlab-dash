@@ -164,6 +164,10 @@ function registerCommTarget(
           // Activate the widget
           app.shell.activateById(widget.id);
         }
+        else if (msgData.type === 'url_request') {
+          const baseUrl = PageConfig.getBaseUrl();
+          comm.send({type: 'url_response', url: baseUrl})
+        }
       };
     }
   );
