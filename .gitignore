@@ -2,3 +2,4 @@
 node_modules/
 *.egg-info/
 .ipynb_checkpoints
+*/__pycache__/*

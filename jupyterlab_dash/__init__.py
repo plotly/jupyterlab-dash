@@ -1,10 +1,13 @@
 import multiprocessing
 import socket
 import uuid
+from threading import Timer
+
 from queue import Empty
+from urllib.parse import urlparse
+import sys
 
 from ipykernel.comm import Comm
-import sys
 
 
 class StdErrorQueue(object):
@@ -20,33 +23,79 @@ class StdErrorQueue(object):
 
 class AppViewer(object):
     _dash_comm = Comm(target_name='dash_viewer')
+    _jupyterlab_url = None
 
-    def __init__(self, host='localhost', port=8050):
+    def __init__(self, host='localhost', port=None):
         self.server_process = None
         self.uid = str(uuid.uuid4())
         self.host = host
-        self.port = port
         self.stderr_queue = StdErrorQueue()
 
+        if port:
+            self.port = port
+        else:
+            # Try to find an open local port if none specified
+            # (Logic borrowed from plotly.io._orca.find_open_port())
+            s = socket.socket()
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind(('', 0))
+            _, port = s.getsockname()
+            s.close()
+            self.port = port
+
     def show(self, app, *args, **kwargs):
-        def run(*args, **kwargs):
-            # Serve App
-            sys.stdout = self.stderr_queue
-            sys.stderr = self.stderr_queue
-            app.run_server(debug=False, *args, **kwargs)
+        self._perform_show(0, app, *args, **kwargs)
 
-        # Terminate any existing server process
-        self.terminate()
+    def _perform_show(self, tries, app, *args, **kwargs):
+        jupyterlab_url = AppViewer._jupyterlab_url
 
-        # precedence host and port
-        launch_kwargs = {'host': self.host, 'port': self.port}
-        launch_kwargs.update(kwargs)
+        if jupyterlab_url is None:
+            # Give up after ~5 seconds
+            if tries > 50:
+                raise IOError("""
+Unable to communicate with the jupyterlab-dash JupyterLab extension.
+Is this Python kernel running inside JupyterLab with the jupyterlab-dash
+extension installed?
 
-        # Start new server process in separate process
-        self.server_process = multiprocessing.Process(target=run, args=args, kwargs=launch_kwargs)
-        self.server_process.daemon = True
-        self.server_process.start()
+You can install the extension with:
 
+$ jupyter labextension install jupyterlab-dash
+""")
+            # Otherwise, try again in another thread after a small delay
+            args = (tries+1, app,) + args
+            timer = Timer(0.1, self._perform_show, args=args, kwargs=kwargs)
+            timer.daemon = True
+            timer.start()
+        else:
+            def run(*args, **kwargs):
+                # Serve App
+                sys.stdout = self.stderr_queue
+                sys.stderr = self.stderr_queue
+
+                # Set pathname prefix for jupyter-server-proxy
+                path = urlparse(jupyterlab_url).path
+                app.config.update({
+                    'requests_pathname_prefix': f'{path}proxy/{self.port}/'})
+
+                app.run_server(debug=False, *args, **kwargs)
+
+            # Terminate any existing server process
+            self.terminate()
+
+            # precedence host and port
+            launch_kwargs = {'host': self.host, 'port': self.port}
+            launch_kwargs.update(kwargs)
+
+            # Start new server process in separate process
+            self.server_process = multiprocessing.Process(
+                target=run, args=args, kwargs=launch_kwargs)
+
+            self.server_process.daemon = True
+            self.server_process.start()
+
+            self._show_when_server_is_ready()
+
+    def _show_when_server_is_ready(self):
         # Wait for server to start
         started = False
         retries = 0
@@ -66,12 +115,10 @@ class AppViewer(object):
 
         if started:
             # Update front-end extension
-            hostname = launch_kwargs['host']
-            resolved_host = socket.getfqdn() if hostname != '127.0.0.1' and hostname != 'localhost' else hostname
             self._dash_comm.send({
                 'type': 'show',
                 'uid': self.uid,
-                'url': 'http://{}:{}'.format(resolved_host, launch_kwargs['port'])
+                'port': self.port
             })
         else:
             # Failed to start development server
@@ -80,3 +127,19 @@ class AppViewer(object):
     def terminate(self):
         if self.server_process:
             self.server_process.terminate()
+
+
+# Register handler to process events sent from the
+# front-end JupyterLab extension to the python kernel
+@AppViewer._dash_comm.on_msg
+def _recv(msg):
+    msg_data = msg.get('content').get('data')
+    msg_type = msg_data.get('type', None)
+    if msg_type == 'url_response':
+        AppViewer._jupyterlab_url = msg_data['url']
+
+
+# Request that the front end extension send us the notebook server base URL
+AppViewer._dash_comm.send({
+    'type': 'url_request'
+})
