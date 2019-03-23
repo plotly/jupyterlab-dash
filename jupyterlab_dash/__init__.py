@@ -24,12 +24,23 @@ class AppViewer(object):
     _dash_comm = Comm(target_name='dash_viewer')
     _jupyterlab_url = None
 
-    def __init__(self, host='localhost', port=8050):
+    def __init__(self, host='localhost', port=None):
         self.server_process = None
         self.uid = str(uuid.uuid4())
         self.host = host
-        self.port = port
         self.stderr_queue = StdErrorQueue()
+
+        if port:
+            self.port = port
+        else:
+            # Try to find an open local port if none specified
+            # (Logic borrowed from plotly.io._orca.find_open_port())
+            s = socket.socket()
+            s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+            s.bind(('', 0))
+            _, port = s.getsockname()
+            s.close()
+            self.port = port
 
     @staticmethod
     @retrying.retry(stop_max_delay=5000)
