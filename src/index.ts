@@ -25,7 +25,7 @@ class DashIFrameWidget extends Widget {
   /**
    * Construct a new DashIFrameWidget.
    */
-  constructor(uid: string, url: string, port: string) {
+  constructor(uid: string, port: string) {
     super();
 
     this.id = uid;
@@ -137,7 +137,6 @@ function registerCommTarget(
             console.log('Create new widget');
             widget = new DashIFrameWidget(
               msgData.uid,
-              msgData.url,
               msgData.port
             );
             widget.update();

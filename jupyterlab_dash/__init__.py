@@ -1,7 +1,8 @@
 import multiprocessing
 import socket
 import uuid
-import retrying
+from threading import Timer
+
 from queue import Empty
 from urllib.parse import urlparse
 import sys
@@ -42,19 +43,16 @@ class AppViewer(object):
             s.close()
             self.port = port
 
-    @staticmethod
-    @retrying.retry(stop_max_delay=5000)
-    def _get_or_wait_for_jupyterlab_url():
-        if AppViewer._jupyterlab_url is None:
-            raise ValueError('_jupyterlab_url is None')
-        return AppViewer._jupyterlab_url
+    def show(self, app, *args, **kwargs):
+        self._perform_show(0, app, *args, **kwargs)
 
-    @staticmethod
-    def get_jupyterlab_url():
-        try:
-            return AppViewer._get_or_wait_for_jupyterlab_url()
-        except ValueError as e:
-            raise IOError("""
+    def _perform_show(self, tries, app, *args, **kwargs):
+        jupyterlab_url = AppViewer._jupyterlab_url
+
+        if jupyterlab_url is None:
+            # Give up after ~5 seconds
+            if tries > 50:
+                raise IOError("""
 Unable to communicate with the jupyterlab-dash JupyterLab extension.
 Is this Python kernel running inside JupyterLab with the jupyterlab-dash
 extension installed?
@@ -63,33 +61,41 @@ You can install the extension with:
 
 $ jupyter labextension install jupyterlab-dash
 """)
+            # Otherwise, try again in another thread after a small delay
+            args = (tries+1, app,) + args
+            timer = Timer(0.1, self._perform_show, args=args, kwargs=kwargs)
+            timer.daemon = True
+            timer.start()
+        else:
+            def run(*args, **kwargs):
+                # Serve App
+                sys.stdout = self.stderr_queue
+                sys.stderr = self.stderr_queue
 
-    def show(self, app, *args, **kwargs):
-        jupyterlab_url = AppViewer.get_jupyterlab_url()
+                # Set pathname prefix for jupyter-server-proxy
+                path = urlparse(jupyterlab_url).path
+                app.config.update({
+                    'requests_pathname_prefix': f'{path}proxy/{self.port}/'})
 
-        def run(*args, **kwargs):
-            # Serve App
-            sys.stdout = self.stderr_queue
-            sys.stderr = self.stderr_queue
+                app.run_server(debug=False, *args, **kwargs)
 
-            # Set pathname prefix for jupyter-server-proxy
-            path = urlparse(jupyterlab_url).path
-            app.config.update({'requests_pathname_prefix': f'{path}proxy/{self.port}/'})
-            
-            app.run_server(debug=False, *args, **kwargs)
+            # Terminate any existing server process
+            self.terminate()
 
-        # Terminate any existing server process
-        self.terminate()
+            # precedence host and port
+            launch_kwargs = {'host': self.host, 'port': self.port}
+            launch_kwargs.update(kwargs)
 
-        # precedence host and port
-        launch_kwargs = {'host': self.host, 'port': self.port}
-        launch_kwargs.update(kwargs)
+            # Start new server process in separate process
+            self.server_process = multiprocessing.Process(
+                target=run, args=args, kwargs=launch_kwargs)
 
-        # Start new server process in separate process
-        self.server_process = multiprocessing.Process(target=run, args=args, kwargs=launch_kwargs)
-        self.server_process.daemon = True
-        self.server_process.start()
+            self.server_process.daemon = True
+            self.server_process.start()
 
+            self._show_when_server_is_ready()
+
+    def _show_when_server_is_ready(self):
         # Wait for server to start
         started = False
         retries = 0
@@ -109,13 +115,10 @@ $ jupyter labextension install jupyterlab-dash
 
         if started:
             # Update front-end extension
-            hostname = launch_kwargs['host']
-            resolved_host = socket.getfqdn() if hostname != '127.0.0.1' and hostname != 'localhost' else hostname
             self._dash_comm.send({
                 'type': 'show',
                 'uid': self.uid,
-                'url': 'http://{}:{}'.format(resolved_host, launch_kwargs['port']),
-                'port': launch_kwargs['port']
+                'port': self.port
             })
         else:
             # Failed to start development server
