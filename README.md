@@ -51,7 +51,7 @@ import jupyterlab_dash
 import dash
 import dash_html_components as html
 
-viewer = jupyterlab_dash.AppViewer(port=8050)
+viewer = jupyterlab_dash.AppViewer()
 
 app = dash.Dash(__name__)
 
