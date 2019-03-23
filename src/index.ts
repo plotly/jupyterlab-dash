@@ -65,7 +65,6 @@ class DashIFrameWidget extends Widget {
 interface DashMessageData {
   type: string;
   uid: string;
-  url: string;
   port: string;
 }
 
