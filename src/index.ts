@@ -18,9 +18,6 @@ import { Widget } from '@phosphor/widgets';
 
 import '../style/index.css';
 
-/**
- * An xckd comic viewer.
- */
 class DashIFrameWidget extends Widget {
   /**
    * Construct a new DashIFrameWidget.
@@ -77,7 +74,7 @@ function activate(
   notebooks: INotebookTracker,
   consoles: IConsoleTracker
 ) {
-  console.log('JupyterLab extension jupyterlab_dash is activated!');
+  console.log('JupyterLab extension jupyterlab-dash is activated!');
 
   // Declare a widget variable
   let widgets = new Map<string, DashIFrameWidget>();
@@ -172,10 +169,10 @@ function registerCommTarget(
 }
 
 /**
- * Initialization data for the jupyterlab_dash extension.
+ * Initialization data for the jupyterlab-dash extension.
  */
 const extension: JupyterLabPlugin<void> = {
-  id: 'jupyterlab_dash',
+  id: 'jupyterlab-dash',
   autoStart: true,
   requires: [ILayoutRestorer, INotebookTracker, IConsoleTracker],
   activate: activate

@@ -1,4 +1,4 @@
-# jupyterlab_dash
+# jupyterlab-dash
 
 [![Binder](https://beta.mybinder.org/badge.svg)](https://mybinder.org/v2/gh/plotly/jupyterlab-dash/master?urlpath=lab%2Ftree%2Fnotebooks)
 
