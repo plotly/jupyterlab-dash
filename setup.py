@@ -8,7 +8,7 @@ from setuptools import setup, Command
 #
 # Package meta-data.
 NAME = 'jupyterlab-dash'
-DESCRIPTION = 'My short description for my project.'
+DESCRIPTION = 'A JupyterLab extensions for rendering Plotly Dash apps'
 URL = 'https://github.com/plotly/jupyterlab-dash'
 AUTHOR = 'Plotly'
 REQUIRES_PYTHON = '>=3.5.0'

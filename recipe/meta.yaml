@@ -1,0 +1,38 @@
+{% set sdata = load_setup_py_data() %}
+
+package:
+  name: jupyterlab-dash
+  version: {{ sdata['version'] }}
+
+source:
+  path: ../
+
+build:
+  number: 0
+  script: "{{ PYTHON }} -m pip install . --no-deps --ignore-installed --no-cache-dir -q"
+  noarch: python
+
+requirements:
+  build:
+    - python >=3.5.0
+    - pip
+
+  run:
+    - python >=3.5.0
+    - dash
+    - jupyter-server-proxy
+
+test:
+  imports:
+    - jupyterlab_dash
+
+about:
+  home: {{ sdata['url'] }}
+  license: {{ sdata['license'] }}
+  license_file: LICENSE.txt
+  summary: {{ sdata['description'] }}
+  dev_url: {{ sdata['url'] }}
+
+extra:
+  recipe-maintainers:
+    - jonmmease
