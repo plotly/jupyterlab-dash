@@ -72,7 +72,7 @@ class UploadCommand(Command):
             sys.executable))
 
         self.status('Uploading the package to PyPI via Twine…')
-        os.system('twine upload --repository-url https://test.pypi.org/legacy/ dist/*')
+        os.system('twine upload dist/*')
 
         self.status('Pushing git tags…')
         os.system('git tag v{0}'.format(about['__version__']))
