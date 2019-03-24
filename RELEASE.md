@@ -27,6 +27,19 @@ Build and upload
 $ python setup.py upload
 ```
 
+## Release jupyterlab-dash to anaconda cloud
+From a conda environment, install `anaconda-client`.
+
+Run `anaconda login` from the terminal and enter the plotly channel credentials.
+
+Build the conda package
+```
+$ conda build recipe/
+```
+
+Upload conda package by running the `anaconda upload ...` command displayed at
+then end of the conda build command above.
+
 ## Release jupyterlab-dash to NPM
 First [install yarn](https://yarnpkg.com/lang/en/docs/install/).
 
