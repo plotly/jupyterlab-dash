@@ -1,6 +1,6 @@
 {
   "name": "jupyterlab-dash",
-  "version": "0.1.0.alpha.1",
+  "version": "0.1.0-alpha.1",
   "description": "A JupyterLab extensions for rendering Plotly Dash apps",
   "keywords": [
     "jupyter",
@@ -32,8 +32,8 @@
   },
   "dependencies": {
     "@jupyterlab/application": "^0.19.1",
-    "@jupyterlab/notebook": "^0.19.2",
-    "@jupyterlab/console": "^0.19.1"
+    "@jupyterlab/console": "^0.19.1",
+    "@jupyterlab/notebook": "^0.19.2"
   },
   "devDependencies": {
     "prettier": "^1.11.1",
