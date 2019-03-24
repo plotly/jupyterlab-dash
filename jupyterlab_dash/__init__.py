@@ -3,6 +3,7 @@ import socket
 import uuid
 import time
 from threading import Timer
+import platform
 
 from queue import Empty
 from urllib.parse import urlparse
@@ -27,6 +28,12 @@ class AppViewer(object):
     _jupyterlab_url = None
 
     def __init__(self, host='localhost', port=None):
+
+        if platform.system() == 'Windows':
+            raise OSError("""\
+Unfortunately, the jupyterlab-dash extension is not yet
+compatible with Windows""")
+
         self.server_process = None
         self.uid = str(uuid.uuid4())
         self.host = host
