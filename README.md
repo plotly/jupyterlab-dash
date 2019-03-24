@@ -18,7 +18,7 @@ extension.
 
 ```
 $ pip install jupyterlab-dash==0.1.0a1
-$ jupyter labextension install jupyterlab-dash@0.1.0.alpha.1
+$ jupyter labextension install jupyterlab-dash@0.1.0-alpha.1
 ```
 
 ## Development Installation
