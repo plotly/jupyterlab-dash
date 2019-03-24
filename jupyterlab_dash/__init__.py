@@ -8,7 +8,7 @@ import platform
 from queue import Empty
 from urllib.parse import urlparse
 import sys
-
+import IPython
 from ipykernel.comm import Comm
 
 
@@ -153,7 +153,9 @@ def _recv(msg):
         AppViewer._jupyterlab_url = msg_data['url']
 
 
-# Request that the front end extension send us the notebook server base URL
-AppViewer._dash_comm.send({
-    'type': 'url_request'
-})
+# If running in an ipython kernel,
+# request that the front end extension send us the notebook server base URL
+if IPython.get_ipython() is not None:
+    AppViewer._dash_comm.send({
+        'type': 'url_request'
+    })
