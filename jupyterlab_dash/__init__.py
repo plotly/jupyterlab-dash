@@ -1,6 +1,7 @@
 import multiprocessing
 import socket
 import uuid
+import time
 from threading import Timer
 
 from queue import Empty
@@ -81,6 +82,12 @@ $ jupyter labextension install jupyterlab-dash
 
             # Terminate any existing server process
             self.terminate()
+
+            # Give the OS a moment to free up the port before
+            # telling Dash to use it again.  This duration was chosen to
+            # work around errors when used on binder, and may need to be
+            # adjusted in the future
+            time.sleep(0.1)
 
             # precedence host and port
             launch_kwargs = {'host': self.host, 'port': self.port}
