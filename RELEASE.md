@@ -55,13 +55,6 @@ yarn publish --access public
 
 Enter the new version number in the prompt
 
-Then tag the release (Where `X.Y.Z` is the version entered above)
-
-```
-$ git tag jupyterlab-vX.Y.Z
-$ git push origin jupyterlab-vX.Y.Z
-```
-
 ## Add GitHub Release entry
 
 Go to https://github.com/plotly/jupyterlab-dash/releases and "Draft a new release"
