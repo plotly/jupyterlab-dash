@@ -131,10 +131,7 @@ function registerCommTarget(
           if (!widgets.has(msgData.uid)) {
             // Create a new widget
             console.log('Create new widget');
-            widget = new DashIFrameWidget(
-              msgData.uid,
-              msgData.port
-            );
+            widget = new DashIFrameWidget(msgData.uid, msgData.port);
             widget.update();
             widgets.set(msgData.uid, widget);
 
@@ -158,10 +155,9 @@ function registerCommTarget(
 
           // Activate the widget
           app.shell.activateById(widget.id);
-        }
-        else if (msgData.type === 'url_request') {
+        } else if (msgData.type === 'url_request') {
           const baseUrl = PageConfig.getBaseUrl();
-          comm.send({type: 'url_response', url: baseUrl})
+          comm.send({ type: 'url_response', url: baseUrl });
         }
       };
     }
