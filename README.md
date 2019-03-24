@@ -17,8 +17,8 @@ The jupyterlab-dash library requires both a Python package and a JupyterLab
 extension.
 
 ```
-$ pip install jupyterlab-dash==0.1.0a1
-$ jupyter labextension install jupyterlab-dash@0.1.0-alpha.1
+$ pip install jupyterlab-dash==0.1.0a2
+$ jupyter labextension install jupyterlab-dash@0.1.0-alpha.2
 ```
 
 ## Development Installation
