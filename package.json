@@ -11,7 +11,7 @@
   "bugs": {
     "url": "https://github.com/my_name/myextension/issues"
   },
-  "license": "BSD-3-Clause",
+  "license": "MIT",
   "author": "Plotly",
   "files": [
     "lib/**/*.{d.ts,eot,gif,html,jpg,js,js.map,json,png,svg,woff2,ttf}",
