@@ -13,20 +13,24 @@ A JupyterLab extension for rendering Plotly Dash apps as a separate window in Ju
 - JupyterLab
 
 ## Installation
+
 The jupyterlab-dash library requires both a Python package and a JupyterLab
 extension.
 
 First, install the Python package using either pip...
+
 ```
 $ pip install jupyterlab-dash==0.1.0a2
 ```
 
 or conda (but not both!).
+
 ```
 $ conda install -c plotly jupyterlab-dash=0.1.0a2
 ```
 
-Then, install the JupyterLab extension 
+Then, install the JupyterLab extension
+
 ```
 $ jupyter labextension install jupyterlab-dash@0.1.0-alpha.2
 ```
