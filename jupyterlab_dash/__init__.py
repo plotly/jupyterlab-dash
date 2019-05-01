@@ -83,7 +83,7 @@ $ jupyter labextension install jupyterlab-dash
                 # Set pathname prefix for jupyter-server-proxy
                 path = urlparse(jupyterlab_url).path
                 app.config.update({
-                    'requests_pathname_prefix': f'{path}proxy/{self.port}/'})
+                    'requests_pathname_prefix': '{}proxy/{}/'.format(path, self.port)})
 
                 app.run_server(debug=False, *args, **kwargs)
 
