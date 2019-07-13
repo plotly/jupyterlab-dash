@@ -1,7 +1,7 @@
 import {
   ILayoutRestorer,
-  JupyterLab,
-  JupyterLabPlugin
+  JupyterFrontEnd,
+  JupyterFrontEndPlugin
 } from '@jupyterlab/application';
 
 import { PageConfig } from '@jupyterlab/coreutils';
@@ -69,7 +69,7 @@ interface DashMessageData {
  * Activate the xckd widget extension.
  */
 function activate(
-  app: JupyterLab,
+  app: JupyterFrontEnd,
   restorer: ILayoutRestorer,
   notebooks: INotebookTracker,
   consoles: IConsoleTracker
@@ -115,7 +115,7 @@ function activate(
 function registerCommTarget(
   kernel: Kernel.IKernelConnection,
   widgets: Map<string, DashIFrameWidget>,
-  app: JupyterLab
+  app: JupyterFrontEnd
 ) {
   kernel.registerCommTarget(
     'dash_viewer',
@@ -145,7 +145,7 @@ function registerCommTarget(
             // Attach the widget to the main work area
             // if it's not there
             console.log('Widget was not attached, adding to main area');
-            app.shell.addToMainArea(widget);
+            app.shell.add(widget, 'main');
             widget.update();
           } else {
             // Refresh the widget
@@ -167,8 +167,8 @@ function registerCommTarget(
 /**
  * Initialization data for the jupyterlab-dash extension.
  */
-const extension: JupyterLabPlugin<void> = {
-  id: 'jupyterlab-dash',
+const extension: JupyterFrontEndPlugin<void> = {
+  id: 'jupyterlab_dash',
   autoStart: true,
   requires: [ILayoutRestorer, INotebookTracker, IConsoleTracker],
   activate: activate
