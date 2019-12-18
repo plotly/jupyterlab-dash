@@ -21,18 +21,18 @@ extension.
 First, install the Python package using either pip...
 
 ```
-$ pip install "jupyterlab>=1.0" jupyterlab-dash==0.1.0a3
+$ pip install "jupyterlab>=1.0" jupyterlab-dash
 ```
 
 or conda (but not both!).
 
 ```
-$ conda install -c plotly -c defaults -c conda-forge "jupyterlab>=1.0" jupyterlab-dash=0.1.0a3
+$ conda install -c plotly -c defaults -c conda-forge "jupyterlab>=1.0" jupyterlab-dash
 ```
 
-Then, install the JupyterLab extension. v6.17.1 of node works, and node 8.x.x or 10+ should also work. 
+Then, install the JupyterLab extension. v6.17.1 of node works, and node 8.x.x or 10+ should also work.
 ```
-$ jupyter labextension install jupyterlab-dash@0.1.0-alpha.3
+$ jupyter labextension install jupyterlab-dash
 ```
 
 ## Development Installation
