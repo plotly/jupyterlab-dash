@@ -86,3 +86,5 @@ app.layout = html.Div('Hello World')
 
 viewer.show(app)
 ```
+
+[See a longer example](https://github.com/plotly/jupyterlab-dash/blob/master/notebooks/test_app_viewer.ipynb)
