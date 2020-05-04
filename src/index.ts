@@ -12,9 +12,9 @@ import { KernelMessage, Kernel } from '@jupyterlab/services';
 
 import { IConsoleTracker } from '@jupyterlab/console';
 
-import { Message } from '@phosphor/messaging';
+import { Message } from '@lumino/messaging';
 
-import { Widget } from '@phosphor/widgets';
+import { Widget } from '@lumino/widgets';
 
 import '../style/index.css';
 
@@ -82,32 +82,30 @@ function activate(
   // Watch notebook creation
   notebooks.widgetAdded.connect((sender, nbPanel: NotebookPanel) => {
     console.log('Notebook added!');
-    const session = nbPanel.session;
-    session.ready.then(() => {
-      console.log('Notebook session ready');
-      let kernel = session.kernel;
-      kernel.ready.then(() => {
-        console.log('Notebook kernel ready');
+    const sessionContext = nbPanel.sessionContext;
+    sessionContext.ready.then(() => {
+      console.log('Notebook session context ready');
+      let kernel = sessionContext.session.kernel;
+      // no need to wait for Kernel to be ready
+      console.log('Notebook kernel ready');
 
-        // Register comm
-        registerCommTarget(kernel, widgets, app);
-      });
+      // Register comm
+      registerCommTarget(kernel, widgets, app);
     });
   });
 
   // Watch console creation
   consoles.widgetAdded.connect((sender, consolePanel) => {
     console.log('Console added!');
-    const session = consolePanel.session;
-    session.ready.then(() => {
+    const sessionContext = consolePanel.sessionContext;
+    sessionContext.ready.then(() => {
       console.log('Console session ready');
-      let kernel = session.kernel;
-      kernel.ready.then(() => {
-        console.log('Console kernel ready');
+      let kernel = sessionContext.session.kernel;
+      // no need to wait for Kernel to be ready
+      console.log('Console kernel ready');
 
-        // Register comm
-        registerCommTarget(kernel, widgets, app);
-      });
+      // Register comm
+      registerCommTarget(kernel, widgets, app);
     });
   });
 }
