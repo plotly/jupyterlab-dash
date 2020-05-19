@@ -1,3 +1,10 @@
+# Announcement
+This project has been replaced by the more capable [JupyterDash](https://github.com/plotly/jupyter-dash) project, and is no longer maintained. JuptyerDash supports multiple Jupyter contexts (not only JupyterLab), supports Windows as well as Linux and MacOS, supports JupyterLab 2.0, and adheres more closely to the traditional Dash API.
+
+> Note: For use in JupyterLab, JupyterDash makes use of the `jupyterlab-dash` JupyterLab extension that was originally developed in this repository. Development of this extension has also been moved to the JupyterDash repository.
+
+---
+ 
 # jupyterlab-dash
 
 [![Binder](https://beta.mybinder.org/badge.svg)](https://mybinder.org/v2/gh/plotly/jupyterlab-dash/master?urlpath=lab%2Ftree%2Fnotebooks)
